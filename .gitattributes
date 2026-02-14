@@ -1,0 +1,10 @@
+Client/Library/** linguist-detectable=false
+Server/Library/** linguist-detectable=false
+Client/Build/** linguist-detectable=false
+Server/Build/** linguist-detectable=false
+**/obj/** linguist-detectable=false
+**/Logs/** linguist-detectable=false
+**/UserSettings/** linguist-detectable=false
+
+Client/Assets/TextMesh?Pro/** linguist-vendored
+Client/Assets/Thirdparty/** linguist-vendored
