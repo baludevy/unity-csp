@@ -8,12 +8,11 @@ public class ClientHandle : MonoBehaviour {
     public static void Welcome(Packet _packet) {
         byte myId = _packet.ReadByte();
         int tick = _packet.ReadInt();
-        float time = _packet.ReadFloat();
 
         Client.Instance.myId = myId;
         Client.isConnected = true;
 
-        TickTimer.tick = tick;
+        TickTimer.tick = tick + 10;
 
         ClientSend.WelcomeReceived();
 
@@ -51,12 +50,10 @@ public class ClientHandle : MonoBehaviour {
 
     public static void WorldSnapshot(Packet _packet) {
         int tick = _packet.ReadInt();
-        float timeDelta = _packet.ReadFloat();
-
+        
         WorldSnapshot worldSnapshot = new WorldSnapshot();
 
-        worldSnapshot.tick = tick;
-        worldSnapshot.timeDelta = timeDelta;
+        worldSnapshot.serverTick = tick;
 
         int playerStateCount = _packet.ReadInt();
 

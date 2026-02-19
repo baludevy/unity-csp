@@ -11,7 +11,7 @@ public class WorldSnapshotManager : MonoBehaviour {
     private WorldSnapshot GetWorldSnapshot(int tick) {
         WorldSnapshot worldSnapshot = new WorldSnapshot();
 
-        worldSnapshot.tick = tick;
+        worldSnapshot.serverTick = tick;
 
         foreach (Client client in Server.clients.Values) {
             if (client.player != null) {
@@ -26,8 +26,6 @@ public class WorldSnapshotManager : MonoBehaviour {
         foreach (Client client in Server.clients.Values) {
             if (client.player != null) {
                 WorldSnapshot snapshot = GetWorldSnapshot(tick);
-
-                snapshot.timeDelta = (float)client.player.syncManager.timeDelta;
 
                 ServerSend.WorldSnapshot(client.player.id, snapshot);
             }

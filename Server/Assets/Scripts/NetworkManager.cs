@@ -1,17 +1,18 @@
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class NetworkManager : MonoBehaviour {
     public static NetworkManager Instance;
 
-    public GameObject playerPrefab;
+    public GameObject PlayerPrefab;
 
-    public static TickTimer tickManager;
+    public static TickTimer TickManager;
     private double nextTickTime;
 
     private void Awake() {
         Instance = this;
-        tickManager = new TickTimer();
+        TickManager = new TickTimer();
     }
 
     private void Start() {
@@ -24,17 +25,17 @@ public class NetworkManager : MonoBehaviour {
     private void Update() {
         ThreadManager.UpdateMain();
 
-        double currentTime = tickManager.GetTime();
+        double currentTime = TickManager.GetTime();
 
         while (currentTime >= nextTickTime) {
-            ProcessTick(tickManager.tick);
+            ProcessTick(TickManager.tick);
             nextTickTime += NetworkSettings.tickTime;
         }
     }
 
     private void ProcessTick(int tick) {
-        tickManager.previousLastTickTime = tickManager.lastTickTime;
-        tickManager.lastTickTime = tickManager.GetTime();
+        TickManager.previousLastTickTime = TickManager.lastTickTime;
+        TickManager.lastTickTime = TickManager.GetTime();
 
         // process one input from the command buffer for every client
         foreach (var client in Server.clients.Values.Where(client => client.player != null)) {
@@ -47,15 +48,15 @@ public class NetworkManager : MonoBehaviour {
         // send out the state of the 'world' to all clients
         WorldSnapshotManager.Instance.SendWorldSnapshotToClients(tick);
 
-        tickManager.tick++;
+        TickManager.tick++;
     }
 
     private void OnApplicationQuit() {
-        tickManager.Stop();
+        TickManager.Stop();
         Server.Stop();
     }
 
     public Player InstantiatePlayer() {
-        return Instantiate(playerPrefab, Vector3.zero, Quaternion.identity).GetComponent<Player>();
+        return Instantiate(PlayerPrefab, Vector3.zero, Quaternion.identity).GetComponent<Player>();
     }
 }

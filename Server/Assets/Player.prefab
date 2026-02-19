@@ -178,7 +178,7 @@ MonoBehaviour:
   stdDevMultiplier: 1
   adaptRateUp: 0.3
   adaptRateDown: 0.15
-  bufferHoldSeconds: 3
+  bufferHoldSeconds: 1
 --- !u!114 &5609098501789670044
 MonoBehaviour:
   m_ObjectHideFlags: 0

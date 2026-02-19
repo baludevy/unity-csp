@@ -40,7 +40,6 @@ public class ClientSend : MonoBehaviour {
         _packet.Write(playerCommands.Count);
         foreach (PlayerInput playerCommand in playerCommands) {
             _packet.Write(playerCommand.currentTick);
-            _packet.Write(playerCommand.lastRenderedTick);
             _packet.Write(playerCommand.up);
             _packet.Write(playerCommand.down);
             _packet.Write(playerCommand.left);

@@ -8,7 +8,6 @@ public class Server {
     public static int MaxPlayers { get; private set; }
     public static int Port { get; private set; }
 
-    // Using a Dictionary is fine if pre-filled, but we must be careful about thread access.
     public static Dictionary<byte, Client> clients = new Dictionary<byte, Client>();
 
     public delegate void PacketHandler(byte _fromClient, Packet _packet);
@@ -32,7 +31,9 @@ public class Server {
         tcpListener.Start();
         tcpListener.BeginAcceptTcpClient(TCPConnectCallback, null);
 
-        udpListener = new UdpClient(Port);
+        lock (udpLock) {
+            udpListener = new UdpClient(Port);
+        }
         udpListener.BeginReceive(UDPReceiveCallback, null);
 
         Debug.Log($"Server started on {Port}.");

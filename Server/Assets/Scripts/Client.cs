@@ -159,7 +159,7 @@ public class Client {
                     int _packetId = _packet.ReadByte();
 
                     if (_packetId == (byte)ClientPackets.playerInput) {
-                        ServerHandle.PlayerInput(id, NetworkManager.tickManager.GetTime(), _packet);
+                        ServerHandle.PlayerInput(id, _packet);
                     }
                     else if (Server.packetHandlers.ContainsKey((byte)_packetId)) {
                         Server.packetHandlers[(byte)_packetId](id, _packet);

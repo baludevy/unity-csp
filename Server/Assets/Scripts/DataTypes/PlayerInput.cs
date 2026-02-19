@@ -1,6 +1,5 @@
 ﻿public class PlayerInput {
     public int currentTick;
-    public int lastRenderedTick;
     public bool up;
     public bool down;
     public bool left;

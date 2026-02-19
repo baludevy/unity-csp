@@ -47,8 +47,7 @@ public abstract class ServerSend {
         using Packet _packet = new Packet((byte)ServerPackets.welcome);
 
         _packet.Write(toClient);
-        _packet.Write(NetworkManager.tickManager.tick);
-        _packet.Write(0f);
+        _packet.Write(NetworkManager.TickManager.tick);
 
         SendTCPData(toClient, _packet);
     }
@@ -72,8 +71,7 @@ public abstract class ServerSend {
 
     public static void WorldSnapshot(byte toClient, WorldSnapshot worldSnapshot) {
         using Packet _packet = new Packet((byte)ServerPackets.worldState);
-        _packet.Write(worldSnapshot.tick);
-        _packet.Write(worldSnapshot.timeDelta);
+        _packet.Write(worldSnapshot.serverTick);
 
         _packet.Write(worldSnapshot.playerStates.Count);
         foreach (PlayerState playerState in worldSnapshot.playerStates) {

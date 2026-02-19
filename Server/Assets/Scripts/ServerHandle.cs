@@ -14,8 +14,8 @@ public abstract class ServerHandle {
 
         Server.clients[fromClient].SendIntoGame(username);
     }
-    
-    public static void PlayerInput(byte fromClient, double arrivalTime, Packet _packet) {
+
+    public static void PlayerInput(byte fromClient, Packet _packet) {
         int playerCommandsCount = _packet.ReadInt();
 
         List<PlayerInput> inputs = new List<PlayerInput>();
@@ -23,7 +23,6 @@ public abstract class ServerHandle {
         for (int i = 0; i < playerCommandsCount; i++) {
             PlayerInput input = new PlayerInput() {
                 currentTick = _packet.ReadInt(),
-                lastRenderedTick = _packet.ReadInt(),
                 up = _packet.ReadBool(),
                 down = _packet.ReadBool(),
                 left = _packet.ReadBool(),
@@ -34,6 +33,6 @@ public abstract class ServerHandle {
             inputs.Add(input);
         }
 
-        Server.clients[fromClient].player.inputManager.AddInputs(inputs, arrivalTime);
+        Server.clients[fromClient].player.inputManager.AddInputs(inputs);
     }
 }

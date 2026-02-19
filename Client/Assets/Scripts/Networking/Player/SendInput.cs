@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,8 +10,10 @@ public class SendInput : MonoBehaviour {
     private bool right;
     private bool jumping;
 
-    public static bool sampleInputs;
-    public static bool sendInputs;
+    public static bool DoSampleInputs = true;
+
+    private static readonly List<PlayerInput> playerInputs = new();
+    public static int lastSentTick { get; private set; }
 
     public PlayerInput[] inputHistory = new PlayerInput[1024];
 
@@ -20,28 +21,20 @@ public class SendInput : MonoBehaviour {
         Instance = this;
     }
 
-    private void Start() {
-        sampleInputs = true;
-        sendInputs = true;
-    }
-
     private void Update() {
         GetInput();
 
-
         if (Input.GetKeyDown(KeyCode.F)) {
-            // Press F to spike
             Debug.Log("Spiking CPU...");
             float endTime = Time.realtimeSinceStartup + 0.5f;
             while (Time.realtimeSinceStartup < endTime) {
-                // Busy loop: maxes CPU
                 float dummy = Mathf.Sin(Time.realtimeSinceStartup);
             }
         }
     }
 
     private void GetInput() {
-        if (!sampleInputs) {
+        if (!DoSampleInputs) {
             up = false;
             down = false;
             left = false;
@@ -59,9 +52,8 @@ public class SendInput : MonoBehaviour {
     }
 
     public PlayerInput SampleInputs(int tick) {
-        PlayerInput input = new PlayerInput() {
+        PlayerInput input = new PlayerInput {
             currentTick = tick,
-            lastRenderedTick = NetworkManager.serverTick,
             up = up,
             down = down,
             left = left,
@@ -73,5 +65,42 @@ public class SendInput : MonoBehaviour {
         inputHistory[i] = input;
 
         return input;
+    }
+
+    public static void SendPlayerInputs() {
+        if (PlayerMovement.Instance == null) return;
+
+        const int redundancy = 1;
+        int bufferSize = NetworkSettings.inputBufferSize;
+
+        int lastCompletedTick = TickTimer.tick - 1;
+        if (lastCompletedTick < 0) return;
+
+        int firstUnsents = lastSentTick + 1;
+
+        playerInputs.Clear();
+
+        for (int t = firstUnsents; t <= lastCompletedTick; t++) {
+            PlayerInput input = Instance.inputHistory[t % bufferSize];
+            if (input != null && input.currentTick == t)
+                playerInputs.Add(input);
+        }
+
+        for (int i = 0; i < redundancy; i++) {
+            int commandTick = lastCompletedTick - i;
+            if (commandTick < 0) break;
+            if (commandTick >= firstUnsents) continue;
+
+            PlayerInput input = Instance.inputHistory[commandTick % bufferSize];
+            if (input != null && input.currentTick == commandTick)
+                playerInputs.Add(input);
+        }
+
+        if (playerInputs.Count == 0) return;
+
+        playerInputs.Sort((a, b) => a.currentTick.CompareTo(b.currentTick));
+        ClientSend.PlayerInput(playerInputs);
+
+        lastSentTick = lastCompletedTick;
     }
 }
