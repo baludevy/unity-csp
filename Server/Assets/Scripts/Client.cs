@@ -11,8 +11,8 @@ public class Client {
     public TCP tcp;
     public UDP udp;
 
-    public Client(byte _clientId) {
-        id = _clientId;
+    public Client(byte clientId) {
+        id = clientId;
         tcp = new TCP(id);
         udp = new UDP(id);
     }
@@ -174,10 +174,10 @@ public class Client {
     }
 
     public void Disconnect() {
-        Debug.Log($"{player?.username ?? "Unknown Player"} (ID: {id}) has disconnected.");
-
         ThreadManager.ExecuteOnMainThread(() => {
             if (player != null) {
+                Debug.Log($"{player.username} ({player.id}) disconnected :(");
+
                 ServerSend.PlayerDisconnected(player);
                 UnityEngine.Object.Destroy(player.gameObject);
                 player = null;
@@ -205,7 +205,7 @@ public class Client {
                 }
             }
 
-            Debug.Log($"Client {id} ('{_playerName}') successfully entered the game.");
+            Debug.Log($"client{id} ({_playerName}) successfully joined the game");
         });
     }
 }

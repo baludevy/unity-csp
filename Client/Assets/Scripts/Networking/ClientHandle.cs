@@ -18,7 +18,7 @@ public class ClientHandle : MonoBehaviour {
 
         ClientManager.Instance.ClientConnected();
 
-        Client.Instance.udp.Connect(((IPEndPoint)Client.Instance.tcp.socket.Client.LocalEndPoint).Port);
+        Client.Instance.udp.Connect();
     }
 
     public static void SpawnPlayer(Packet _packet) {

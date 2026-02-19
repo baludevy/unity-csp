@@ -5,7 +5,6 @@ public class PlayerInputBuffer {
     private int inputBufferSize;
     
     private int lastProcessedTick = -1;
-    private int latestReceivedTick = -1;
     private PlayerInput lastReturnedInput = new();
 
     public void Initialize(int bufferSize) {
@@ -32,15 +31,8 @@ public class PlayerInputBuffer {
 
     public void AddInputToQueue(PlayerInput input) {
         if (input.currentTick < lastProcessedTick) return;
-        latestReceivedTick = input.currentTick;
-
-        Debug.Log($"received input for tick {input.currentTick}, ibuf queued: {GetQueuedCount()}");
 
         int index = input.currentTick % inputBufferSize;
         inputBuffer[index] = input;
-    }
-
-    private int GetQueuedCount() {
-        return Mathf.Max(0, latestReceivedTick - lastProcessedTick);
     }
 }

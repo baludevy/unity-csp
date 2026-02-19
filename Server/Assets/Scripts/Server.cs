@@ -23,8 +23,7 @@ public class Server {
         MaxPlayers = _maxPlayers;
         Port = _port;
         isStopping = false;
-
-        Debug.Log("Starting server...");
+        
         InitializeServerData();
 
         tcpListener = new TcpListener(IPAddress.Any, Port);
@@ -36,7 +35,7 @@ public class Server {
         }
         udpListener.BeginReceive(UDPReceiveCallback, null);
 
-        Debug.Log($"Server started on {Port}.");
+        Debug.Log($"server now running on port {Port}");
     }
 
     private static void TCPConnectCallback(IAsyncResult _result) {
@@ -46,8 +45,6 @@ public class Server {
             TcpClient _client = tcpListener.EndAcceptTcpClient(_result);
             tcpListener.BeginAcceptTcpClient(TCPConnectCallback, null);
 
-            Debug.Log($"Incoming connection from {_client.Client.RemoteEndPoint}...");
-
             for (byte i = 1; i <= MaxPlayers; i++) {
                 if (clients[i].tcp.socket == null) {
                     clients[i].tcp.Connect(_client);
@@ -55,11 +52,11 @@ public class Server {
                 }
             }
 
-            Debug.Log($"{_client.Client.RemoteEndPoint} failed to connect: Server full.");
-            _client.Close(); // Server full
+            Debug.Log($"{_client.Client.RemoteEndPoint} cant fit in");
+            _client.Close();
         }
         catch (Exception ex) {
-            Debug.LogError($"TCP Accept Error: {ex.Message}");
+            Debug.LogError($"tcp accept error: {ex.Message}");
         }
     }
 
@@ -77,25 +74,21 @@ public class Server {
                 byte _clientId = _packet.ReadByte();
 
                 if (_clientId == 0 || !clients.ContainsKey(_clientId)) return;
-
-                // SECURITY: Only allow UDP if TCP is already connected. 
-                // Prevents session hijacking by random UDP packets.
+                
                 if (clients[_clientId].tcp.socket == null) return;
 
                 if (clients[_clientId].udp.endPoint == null) {
-                    // If this is a new connection, authorize it
                     clients[_clientId].udp.Connect(_clientEndPoint);
                     return;
                 }
 
-                // SECURITY: Ensure the UDP packet comes from the same source as the initial connection
                 if (clients[_clientId].udp.endPoint.ToString() == _clientEndPoint.ToString()) {
                     clients[_clientId].udp.HandleData(_packet);
                 }
             }
         }
         catch (Exception ex) {
-            Debug.LogError($"UDP Receive Error: {ex.Message}");
+            Debug.LogError($"udp receive Error: {ex.Message}");
         }
     }
 
@@ -105,10 +98,8 @@ public class Server {
         try {
             if (_clientEndPoint != null) {
                 byte[] data = _packet.ToArray();
-
-                // Prevent fragmentation issues by keeping packets under MTU (safe approx 1200-1400)
+                
                 if (data.Length > 1400) {
-                    Debug.LogWarning($"UDP Packet too large ({data.Length} bytes). Discarding.");
                     return;
                 }
 
@@ -118,7 +109,7 @@ public class Server {
             }
         }
         catch (Exception ex) {
-            Debug.LogError($"UDP Send Error: {ex.Message}");
+            Debug.LogError($"udp send error: {ex.Message}");
         }
     }
 
@@ -127,7 +118,7 @@ public class Server {
             udpListener?.EndSend(_result);
         }
         catch (Exception ex) {
-            Debug.LogError($"UDP SendCallback Error: {ex.Message}");
+            Debug.LogError($"udp SendCallback error: {ex.Message}");
         }
     }
 
@@ -157,6 +148,6 @@ public class Server {
             udpListener = null;
         }
 
-        Debug.Log("Server stopped.");
+        Debug.Log("server stopped owo");
     }
 }

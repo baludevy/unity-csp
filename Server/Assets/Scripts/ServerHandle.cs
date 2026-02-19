@@ -5,11 +5,10 @@ public abstract class ServerHandle {
     public static void WelcomeReceived(byte fromClient, Packet _packet) {
         byte clientIdCheck = _packet.ReadByte();
         string username = _packet.ReadString();
-
-        Debug.Log($"Client {username} with user id {clientIdCheck} connected.");
+        
         if (fromClient != clientIdCheck) {
             Debug.Log(
-                $"Player \"{username}\" (id: {fromClient}) has assumed the wrong client id ({clientIdCheck})!");
+                $"player \"{username}\" (id: {fromClient}) has assumed the wrong client id ({clientIdCheck})");
         }
 
         Server.clients[fromClient].SendIntoGame(username);

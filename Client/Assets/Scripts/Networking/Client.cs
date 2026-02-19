@@ -73,7 +73,7 @@ public class Client : MonoBehaviour {
                 stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallback, null);
             }
             catch (Exception ex) {
-                Debug.LogError($"Connection failed: {ex.Message}");
+                Debug.LogError($"connection failed: {ex.Message}");
                 Instance.Disconnect();
             }
         }
@@ -85,7 +85,7 @@ public class Client : MonoBehaviour {
                 }
             }
             catch (Exception ex) {
-                Debug.LogError($"TCP Send Error: {ex.Message}");
+                Debug.LogError($"tcp send error: {ex.Message}");
                 Instance.Disconnect();
             }
         }
@@ -165,18 +165,17 @@ public class Client : MonoBehaviour {
         private UdpClient socket;
         private IPEndPoint endPoint = new(IPAddress.Parse(Instance.ip), Instance.port);
 
-        public void Connect(int _localPort) {
+        public void Connect() {
             try {
-                socket = new UdpClient(_localPort);
+                socket = new UdpClient(0);
                 socket.Connect(endPoint);
                 socket.BeginReceive(ReceiveCallback, null);
 
-                // Initialize handshake
                 using Packet _packet = new Packet();
                 SendData(_packet);
             }
             catch (Exception ex) {
-                Debug.LogError($"UDP Connect Error: {ex.Message}");
+                Debug.LogError($"udp connect error: {ex.Message}");
             }
         }
 
@@ -186,7 +185,7 @@ public class Client : MonoBehaviour {
                 socket?.BeginSend(_packet.ToArray(), _packet.Length(), null, null);
             }
             catch (Exception ex) {
-                Debug.LogError($"UDP Send Error: {ex.Message}");
+                Debug.LogError($"udp send error: {ex.Message}");
             }
         }
 
@@ -240,7 +239,6 @@ public class Client : MonoBehaviour {
             { (byte)ServerPackets.playerDisconnected, ClientHandle.PlayerDisconnected },
             { (byte)ServerPackets.worldState, ClientHandle.WorldSnapshot },
         };
-        Debug.Log("Client packets initialized.");
     }
 
     public void Disconnect() {
@@ -250,7 +248,7 @@ public class Client : MonoBehaviour {
         tcp?.Disconnect();
         udp?.Disconnect();
 
-        Debug.Log("Disconnected from server.");
+        Debug.Log("disconnected owo");
 
         ThreadManager.ExecuteOnMainThread(() => { ClientManager.Instance?.ClientDisconnected(); });
     }
