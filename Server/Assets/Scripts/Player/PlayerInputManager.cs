@@ -1,6 +1,6 @@
 ﻿using System;
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class PlayerInputManager : MonoBehaviour {
     private Player player;
@@ -13,12 +13,10 @@ public class PlayerInputManager : MonoBehaviour {
         playerInputBuffer.Initialize(NetworkSettings.inputBufferSize);
     }
 
-    public void ProcessInput(int currentTick) {
-        PlayerInput currentInput = playerInputBuffer.GetInput(currentTick);
+    public void ProcessInput(uint currentTick) {
+        var currentInput = playerInputBuffer.GetInput(currentTick);
 
-        if (currentInput != null) {
-            player.movement.SetInput(currentInput.x(), currentInput.y(), currentInput.jumping);
-        }
+        if (currentInput != null) player.movement.SetInput(currentInput.x(), currentInput.y(), currentInput.jumping);
 
         player.movement.AdvanceLogic();
     }
@@ -27,12 +25,10 @@ public class PlayerInputManager : MonoBehaviour {
         if (inputs == null || inputs.Count == 0) return;
 
         try {
-            foreach (PlayerInput input in inputs) {
-                playerInputBuffer.AddInputToQueue(input);
-            }
+            foreach (var input in inputs) playerInputBuffer.AddInputToQueue(input);
         }
         catch (Exception ex) {
-            ThreadManager.ExecuteOnMainThread(() => { Debug.Log("Error adding input: " + ex.Message); });
+            ThreadManager.ExecuteOnMainThread(() => { Debug.Log("error adding input: " + ex.Message); });
         }
     }
 }

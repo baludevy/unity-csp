@@ -1,13 +1,12 @@
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class NetworkManager : MonoBehaviour {
     public static NetworkManager Instance;
 
-    public GameObject PlayerPrefab;
-
     public static TickTimer TickManager;
+
+    public GameObject PlayerPrefab;
     private double nextTickTime;
 
     private void Awake() {
@@ -25,7 +24,7 @@ public class NetworkManager : MonoBehaviour {
     private void Update() {
         ThreadManager.UpdateMain();
 
-        double currentTime = TickManager.GetTime();
+        var currentTime = TickManager.GetTime();
 
         while (currentTime >= nextTickTime) {
             ProcessTick(TickManager.tick);
@@ -33,14 +32,18 @@ public class NetworkManager : MonoBehaviour {
         }
     }
 
-    private void ProcessTick(int tick) {
+    private void OnApplicationQuit() {
+        TickManager.Stop();
+        Server.Stop();
+    }
+
+    private void ProcessTick(uint tick) {
         TickManager.previousLastTickTime = TickManager.lastTickTime;
         TickManager.lastTickTime = TickManager.GetTime();
 
         // process one input from the command buffer for every client
-        foreach (var client in Server.clients.Values.Where(client => client.player != null)) {
+        foreach (var client in Server.clients.Values.Where(client => client.player != null))
             client.player.inputManager.ProcessInput(tick);
-        }
 
         // advance one physics frame
         Physics.Simulate(NetworkSettings.tickTime);
@@ -49,11 +52,6 @@ public class NetworkManager : MonoBehaviour {
         WorldSnapshotManager.Instance.SendWorldSnapshotToClients(tick);
 
         TickManager.tick++;
-    }
-
-    private void OnApplicationQuit() {
-        TickManager.Stop();
-        Server.Stop();
     }
 
     public Player InstantiatePlayer() {

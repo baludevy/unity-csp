@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using UnityEngine;
 
 public class TickTimer : MonoBehaviour {
-    private static float timeScale = 1f;
-    public static int tick;
+    private static readonly float timeScale = 1f;
+    public static uint tick;
 
     private static readonly Stopwatch stopwatch = Stopwatch.StartNew();
     private static double accumulator;
     private static double currentTime;
-    
-    public static double GetTime() => stopwatch.Elapsed.TotalSeconds;
 
     private void Start() {
         currentTime = GetTime();
@@ -20,8 +16,8 @@ public class TickTimer : MonoBehaviour {
     }
 
     private void Update() {
-        double newTime = GetTime();
-        double frameTime = (newTime - currentTime) * timeScale;
+        var newTime = GetTime();
+        var frameTime = (newTime - currentTime) * timeScale;
         currentTime = newTime;
 
         double tickInterval = NetworkSettings.tickTime;
@@ -37,10 +33,14 @@ public class TickTimer : MonoBehaviour {
             SendInput.SendPlayerInputs();
     }
 
+    public static double GetTime() {
+        return stopwatch.Elapsed.TotalSeconds;
+    }
+
     private static void Tick() {
         if (PlayerMovement.Instance == null) return;
 
-        PlayerInput input = SendInput.Instance.SampleInputs(tick);
+        var input = SendInput.Instance.SampleInputs(tick);
         PlayerPrediction.Instance.PredictState(input);
 
         Physics.Simulate(NetworkSettings.tickTime);

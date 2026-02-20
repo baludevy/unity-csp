@@ -1,10 +1,10 @@
 ﻿public class PlayerInput {
-    public int currentTick;
-    public bool up;
+    public uint currentTick;
     public bool down;
+    public bool jumping;
     public bool left;
     public bool right;
-    public bool jumping;
+    public bool up;
 
     public float x() {
         return (right ? 1f : 0f) - (left ? 1f : 0f);

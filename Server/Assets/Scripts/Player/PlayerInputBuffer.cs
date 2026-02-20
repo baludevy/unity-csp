@@ -1,19 +1,17 @@
-using UnityEngine;
-
 public class PlayerInputBuffer {
     private PlayerInput[] inputBuffer;
-    private int inputBufferSize;
-    
-    private int lastProcessedTick = -1;
+    private uint inputBufferSize;
+
+    private uint lastProcessedTick;
     private PlayerInput lastReturnedInput = new();
 
-    public void Initialize(int bufferSize) {
+    public void Initialize(uint bufferSize) {
         inputBufferSize = bufferSize;
         inputBuffer = new PlayerInput[bufferSize];
     }
 
-    public PlayerInput GetInput(int tick) {
-        int index = tick % inputBufferSize;
+    public PlayerInput GetInput(uint tick) {
+        var index = tick % inputBufferSize;
         var input = inputBuffer[index];
 
         if (input != null && input.currentTick == tick && tick > lastProcessedTick) {
@@ -32,7 +30,8 @@ public class PlayerInputBuffer {
     public void AddInputToQueue(PlayerInput input) {
         if (input.currentTick < lastProcessedTick) return;
 
-        int index = input.currentTick % inputBufferSize;
+
+        var index = input.currentTick % inputBufferSize;
         inputBuffer[index] = input;
     }
 }

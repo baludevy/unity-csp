@@ -24,7 +24,7 @@ public class ClientSend : MonoBehaviour {
     #region Packets
 
     public static void WelcomeReceived() {
-        using Packet _packet = new Packet((byte)ClientPackets.welcomeReceived);
+        using var _packet = new Packet((byte)ClientPackets.welcomeReceived);
         _packet.Write(Client.Instance.myId);
 
         _packet.Write(NetworkUIManager.Instance.usernameField.text != ""
@@ -34,18 +34,19 @@ public class ClientSend : MonoBehaviour {
         SendTCPData(_packet);
     }
 
-    public static void PlayerInput(List<PlayerInput> playerCommands) {
-        using Packet _packet = new Packet((byte)ClientPackets.playerInput);
+    public static void PlayerInput(List<PlayerInput> inputs) {
+        using var _packet = new Packet((byte)ClientPackets.playerInput);
 
-        _packet.Write(playerCommands.Count);
-        foreach (PlayerInput playerCommand in playerCommands) {
-            _packet.Write(playerCommand.currentTick);
-            _packet.Write(playerCommand.up);
-            _packet.Write(playerCommand.down);
-            _packet.Write(playerCommand.left);
-            _packet.Write(playerCommand.right);
-            _packet.Write(playerCommand.jumping);
+        _packet.Write((byte)inputs.Count);
+        foreach (var input in inputs) {
+            _packet.Write(input.currentTick);
+            _packet.Write(input.up);
+            _packet.Write(input.down);
+            _packet.Write(input.left);
+            _packet.Write(input.right);
+            _packet.Write(input.jumping);
         }
+
 
         SendUDPData(_packet);
     }

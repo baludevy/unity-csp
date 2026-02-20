@@ -3,18 +3,19 @@ using System.Diagnostics;
 using System.Threading;
 
 public class TickTimer {
-    public int tick;
-
-    private Thread tickThread;
-
     private readonly Stopwatch stopwatch = Stopwatch.StartNew();
 
     public double lastTickTime;
-    public double previousLastTickTime;
 
     public Action<int> onTick;
+    public double previousLastTickTime;
+    public uint tick;
 
-    public double GetTime() => stopwatch.Elapsed.TotalSeconds;
+    private Thread tickThread;
+
+    public double GetTime() {
+        return stopwatch.Elapsed.TotalSeconds;
+    }
 
     public void Stop() {
     }

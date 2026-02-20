@@ -10,7 +10,7 @@ public class Utils {
     }
 
     public static float ticksToTime(int _ticks) {
-        return (float)_ticks * (1f / 50);
+        return _ticks * (1f / 50);
     }
 
     public static float roundTimeToTimeStep(float _time) {

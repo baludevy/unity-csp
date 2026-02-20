@@ -8,10 +8,10 @@ public class PlayerStateManager : MonoBehaviour {
     }
 
     public PlayerState GetState() {
-        return new PlayerState() {
+        return new PlayerState {
             id = player.id,
             position = player.movement.transform.position,
-            velocity = player.movement.rb.velocity,
+            velocity = player.movement.rb.velocity
         };
     }
 }

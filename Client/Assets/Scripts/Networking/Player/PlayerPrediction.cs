@@ -1,21 +1,26 @@
 ﻿using UnityEngine;
 
 public class PlayerPrediction : MonoBehaviour {
+    private const float positionErrorThreshold = 0.000000001f;
     public static PlayerPrediction Instance;
 
-    private Vector3[] positionHistory = new Vector3[NetworkSettings.inputBufferSize];
-    private bool[] hasPositionHistory = new bool[NetworkSettings.inputBufferSize];
-
-    private const float positionErrorThreshold = 0.000000001f;
-
     public GameObject visualPlayerObj;
+    private readonly bool[] hasPositionHistory = new bool[NetworkSettings.inputBufferSize];
+
+    private readonly Vector3[] positionHistory = new Vector3[NetworkSettings.inputBufferSize];
 
     private void Awake() {
         Instance = this;
     }
 
+    private void Update() {
+        if (PlayerMovement.Instance == null || visualPlayerObj == null) return;
+
+        visualPlayerObj.transform.position = PlayerMovement.Instance.transform.position;
+    }
+
     public void PredictState(PlayerInput input) {
-        int i = input.currentTick % NetworkSettings.inputBufferSize;
+        var i = input.currentTick % NetworkSettings.inputBufferSize;
 
         // Debug.Log($"Performing prediction on tick: {input.currentTick} with x:{input.x()} y:{input.y()}");
 
@@ -28,37 +33,30 @@ public class PlayerPrediction : MonoBehaviour {
         visualPlayerObj.transform.position = PlayerMovement.Instance.transform.position;
     }
 
-    private void Update() {
-        if (PlayerMovement.Instance == null || visualPlayerObj == null) return;
-
-        visualPlayerObj.transform.position = PlayerMovement.Instance.transform.position;
-    }
-
-    public void CompareServerState(PlayerState playerState, int tick) {
+    public void CompareServerState(PlayerState playerState, uint tick) {
         // if (PlayerMovement.Instance == null || tick > NetworkManager.inputTick) return;
 
-        int index = tick % NetworkSettings.inputBufferSize;
+        var index = tick % NetworkSettings.inputBufferSize;
 
         if (!hasPositionHistory[index]) return;
 
-        Vector3 prePosition = positionHistory[index];
+        var prePosition = positionHistory[index];
 
-        float errorSqrMag = (playerState.position - prePosition).sqrMagnitude;
-        if (errorSqrMag > positionErrorThreshold) {
+        var errorSqrMag = (playerState.position - prePosition).sqrMagnitude;
+        if (errorSqrMag > positionErrorThreshold)
             // Debug.Log($"Desync by {errorSqrMag}");
             SynchronizeMovement(playerState, tick);
-        }
     }
 
-    private void SynchronizeMovement(PlayerState playerState, int tick) {
-        Vector3 serverPosition = playerState.position;
+    private void SynchronizeMovement(PlayerState playerState, uint tick) {
+        var serverPosition = playerState.position;
         PlayerMovement.Instance.transform.position = serverPosition;
         PlayerMovement.Instance.rb.velocity = playerState.velocity;
 
-        int lastSimulatedTick = TickTimer.tick - 1;
-        for (int i = tick + 1; i <= lastSimulatedTick; i++) {
-            int cacheIndex = i % NetworkSettings.inputBufferSize;
-            PlayerInput input = SendInput.Instance.inputHistory[cacheIndex];
+        var lastSimulatedTick = TickTimer.tick - 1;
+        for (var i = tick + 1; i <= lastSimulatedTick; i++) {
+            var cacheIndex = i % NetworkSettings.inputBufferSize;
+            var input = SendInput.Instance.inputHistory[cacheIndex];
             if (input == null || input.currentTick != i) {
                 Debug.Log("fuck");
                 break;

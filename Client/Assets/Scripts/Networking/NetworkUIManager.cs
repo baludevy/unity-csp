@@ -13,7 +13,7 @@ public class NetworkUIManager : MonoBehaviour {
     }
 
     public void ConnectToServer() {
-        string ip = ipField.text == "" ? "127.0.0.1" : ipField.text;
+        var ip = ipField.text == "" ? "127.0.0.1" : ipField.text;
 
         Client.Instance.ConnectToServer(ip);
     }

@@ -1,7 +1,8 @@
 ﻿public class PlayerInput {
-    public int currentTick;
+    public uint currentTick;
     public bool up;
     public bool down;
+
     public bool left;
     public bool right;
     public bool jumping;

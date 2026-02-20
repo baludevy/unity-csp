@@ -3,30 +3,29 @@ using UnityEngine;
 
 public abstract class ServerHandle {
     public static void WelcomeReceived(byte fromClient, Packet _packet) {
-        byte clientIdCheck = _packet.ReadByte();
-        string username = _packet.ReadString();
-        
-        if (fromClient != clientIdCheck) {
+        var clientIdCheck = _packet.ReadByte();
+        var username = _packet.ReadString();
+
+        if (fromClient != clientIdCheck)
             Debug.Log(
                 $"player \"{username}\" (id: {fromClient}) has assumed the wrong client id ({clientIdCheck})");
-        }
 
         Server.clients[fromClient].SendIntoGame(username);
     }
 
     public static void PlayerInput(byte fromClient, Packet _packet) {
-        int playerCommandsCount = _packet.ReadInt();
+        var inputCount = _packet.ReadByte();
 
-        List<PlayerInput> inputs = new List<PlayerInput>();
+        var inputs = new List<PlayerInput>();
 
-        for (int i = 0; i < playerCommandsCount; i++) {
-            PlayerInput input = new PlayerInput() {
-                currentTick = _packet.ReadInt(),
+        for (byte i = 0; i < inputCount; i++) {
+            var input = new PlayerInput {
+                currentTick = _packet.ReadUInt(),
                 up = _packet.ReadBool(),
                 down = _packet.ReadBool(),
                 left = _packet.ReadBool(),
                 right = _packet.ReadBool(),
-                jumping = _packet.ReadBool(),
+                jumping = _packet.ReadBool()
             };
 
             inputs.Add(input);

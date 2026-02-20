@@ -1,4 +1,3 @@
-using System.Net;
 using UnityEngine;
 
 public class ClientHandle : MonoBehaviour {
@@ -6,8 +5,8 @@ public class ClientHandle : MonoBehaviour {
     public static float packetsReceived;
 
     public static void Welcome(Packet _packet) {
-        byte myId = _packet.ReadByte();
-        int tick = _packet.ReadInt();
+        var myId = _packet.ReadByte();
+        var tick = _packet.ReadUInt();
 
         Client.Instance.myId = myId;
         Client.isConnected = true;
@@ -22,24 +21,24 @@ public class ClientHandle : MonoBehaviour {
     }
 
     public static void SpawnPlayer(Packet _packet) {
-        byte id = _packet.ReadByte();
-        string username = _packet.ReadString();
-        Vector3 position = _packet.ReadVector3();
-        Quaternion rotation = _packet.ReadQuaternion();
+        var id = _packet.ReadByte();
+        var username = _packet.ReadString();
+        var position = _packet.ReadVector3();
+        var rotation = _packet.ReadQuaternion();
 
         GameManager.Instance.SpawnPlayer(id, username, position, rotation);
     }
 
     public static void PlayerDisconnected(Packet _packet) {
-        byte id = _packet.ReadByte();
+        var id = _packet.ReadByte();
 
         if (GameManager.players[id] != null) {
             if (id == Client.Instance.myId) {
                 Client.Instance.Disconnect();
-                Debug.Log("Disconnected by the server.");
+                Debug.Log("disconnected by the server owo");
             }
             else {
-                if (GameManager.players.TryGetValue(id, out PlayerManager player)) {
+                if (GameManager.players.TryGetValue(id, out var player)) {
                     Debug.Log($"Player{id} disconnected.");
                     Destroy(player.gameObject);
                     GameManager.players.Remove(id);
@@ -49,16 +48,16 @@ public class ClientHandle : MonoBehaviour {
     }
 
     public static void WorldSnapshot(Packet _packet) {
-        int tick = _packet.ReadInt();
-        
-        WorldSnapshot worldSnapshot = new WorldSnapshot();
+        var tick = _packet.ReadUInt();
+
+        var worldSnapshot = new WorldSnapshot();
 
         worldSnapshot.serverTick = tick;
 
-        int playerStateCount = _packet.ReadInt();
+        var playerStateCount = _packet.ReadInt();
 
-        for (int i = 0; i < playerStateCount; i++) {
-            PlayerState playerState = new PlayerState() {
+        for (var i = 0; i < playerStateCount; i++) {
+            var playerState = new PlayerState {
                 id = _packet.ReadByte(),
                 position = _packet.ReadVector3(),
                 velocity = _packet.ReadVector3()

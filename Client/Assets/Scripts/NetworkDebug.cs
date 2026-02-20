@@ -3,23 +3,23 @@ using UnityEngine;
 
 public class NetworkDebug : MonoBehaviour {
     public static NetworkDebug Instance;
+    private float bReceived;
+    private float bSent;
+    private TMP_Text byteDownText;
+    private TMP_Text byteUpText;
+    private TMP_Text gameSpeedText;
 
     private Transform holder;
 
-    private TMP_Text pingText;
-    private TMP_Text byteUpText;
-    private TMP_Text byteDownText;
-    private TMP_Text packetUpText;
-    private TMP_Text packetDownText;
-    private TMP_Text gameSpeedText;
-
     private TMP_Text localLagCompPlayerPositions;
-    private TMP_Text serverLagCompPlayerPositions;
+    private TMP_Text packetDownText;
+    private TMP_Text packetUpText;
+
+    private TMP_Text pingText;
+    private float pReceived;
 
     private float pSent;
-    private float pReceived;
-    private float bSent;
-    private float bReceived;
+    private TMP_Text serverLagCompPlayerPositions;
 
     private void Awake() {
         Instance = this;

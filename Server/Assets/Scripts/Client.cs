@@ -2,11 +2,12 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class Client {
     private const int dataBufferSize = 4096;
 
-    private byte id;
+    private readonly byte id;
     public Player player;
     public TCP tcp;
     public UDP udp;
@@ -17,12 +18,45 @@ public class Client {
         udp = new UDP(id);
     }
 
+    public void Disconnect() {
+        ThreadManager.ExecuteOnMainThread(() => {
+            if (player != null) {
+                Debug.Log($"{player.username} ({player.id}) disconnected :(");
+
+                ServerSend.PlayerDisconnected(player);
+                Object.Destroy(player.gameObject);
+                player = null;
+            }
+        });
+
+        tcp.Disconnect();
+        udp.Disconnect();
+    }
+
+    public void SendIntoGame(string _playerName) {
+        ThreadManager.ExecuteOnMainThread(() => {
+            if (player != null) return;
+
+            player = NetworkManager.Instance.InstantiatePlayer();
+            player.Initialize(id, _playerName);
+
+            foreach (var _client in Server.clients.Values)
+                if (_client.player != null) {
+                    ServerSend.SpawnPlayer(id, _client.player);
+
+                    if (_client.id != id) ServerSend.SpawnPlayer(_client.id, player);
+                }
+
+            Debug.Log($"client{id} ({_playerName}) successfully joined the game");
+        });
+    }
+
     public class TCP {
-        public TcpClient socket;
         private readonly byte id;
-        private NetworkStream stream;
-        private Packet receivedData;
         private byte[] receiveBuffer;
+        private Packet receivedData;
+        public TcpClient socket;
+        private NetworkStream stream;
 
         public TCP(byte _id) {
             id = _id;
@@ -44,7 +78,7 @@ public class Client {
         public void SendData(Packet _packet) {
             try {
                 if (socket != null && stream != null) {
-                    byte[] data = _packet.ToArray();
+                    var data = _packet.ToArray();
                     stream.BeginWrite(data, 0, data.Length, SendCallback, null);
                 }
             }
@@ -67,13 +101,13 @@ public class Client {
             try {
                 if (stream == null) return;
 
-                int _byteLength = stream.EndRead(_result);
+                var _byteLength = stream.EndRead(_result);
                 if (_byteLength <= 0) {
                     Server.clients[id].Disconnect();
                     return;
                 }
 
-                byte[] _data = new byte[_byteLength];
+                var _data = new byte[_byteLength];
                 Array.Copy(receiveBuffer, _data, _byteLength);
 
                 receivedData.Reset(HandleData(_data));
@@ -86,7 +120,7 @@ public class Client {
         }
 
         private bool HandleData(byte[] _data) {
-            int _packetLength = 0;
+            var _packetLength = 0;
 
             receivedData.SetBytes(_data);
 
@@ -96,17 +130,15 @@ public class Client {
             }
 
             while (_packetLength > 0 && _packetLength <= receivedData.UnreadLength()) {
-                byte[] _packetBytes = receivedData.ReadBytes(_packetLength);
+                var _packetBytes = receivedData.ReadBytes(_packetLength);
 
                 ThreadManager.ExecuteOnMainThread(() => {
-                    using (Packet _packet = new Packet(_packetBytes)) {
+                    using (var _packet = new Packet(_packetBytes)) {
                         int _packetId = _packet.ReadByte();
-                        if (Server.packetHandlers.ContainsKey((byte)_packetId)) {
+                        if (Server.packetHandlers.ContainsKey((byte)_packetId))
                             Server.packetHandlers[(byte)_packetId](id, _packet);
-                        }
-                        else {
+                        else
                             Debug.LogWarning($"Unknown packet ID: {_packetId}");
-                        }
                     }
                 });
 
@@ -135,8 +167,8 @@ public class Client {
     }
 
     public class UDP {
-        public IPEndPoint endPoint;
         private readonly byte id;
+        public IPEndPoint endPoint;
 
         public UDP(byte _id) {
             id = _id;
@@ -151,19 +183,17 @@ public class Client {
         }
 
         public void HandleData(Packet _packetData) {
-            int _packetLength = _packetData.ReadInt();
-            byte[] _packetBytes = _packetData.ReadBytes(_packetLength);
+            var _packetLength = _packetData.ReadInt();
+            var _packetBytes = _packetData.ReadBytes(_packetLength);
 
             ThreadManager.ExecuteOnMainThread(() => {
-                using (Packet _packet = new Packet(_packetBytes)) {
+                using (var _packet = new Packet(_packetBytes)) {
                     int _packetId = _packet.ReadByte();
 
-                    if (_packetId == (byte)ClientPackets.playerInput) {
+                    if (_packetId == (byte)ClientPackets.playerInput)
                         ServerHandle.PlayerInput(id, _packet);
-                    }
-                    else if (Server.packetHandlers.ContainsKey((byte)_packetId)) {
+                    else if (Server.packetHandlers.ContainsKey((byte)_packetId))
                         Server.packetHandlers[(byte)_packetId](id, _packet);
-                    }
                 }
             });
         }
@@ -171,41 +201,5 @@ public class Client {
         public void Disconnect() {
             endPoint = null;
         }
-    }
-
-    public void Disconnect() {
-        ThreadManager.ExecuteOnMainThread(() => {
-            if (player != null) {
-                Debug.Log($"{player.username} ({player.id}) disconnected :(");
-
-                ServerSend.PlayerDisconnected(player);
-                UnityEngine.Object.Destroy(player.gameObject);
-                player = null;
-            }
-        });
-
-        tcp.Disconnect();
-        udp.Disconnect();
-    }
-
-    public void SendIntoGame(string _playerName) {
-        ThreadManager.ExecuteOnMainThread(() => {
-            if (player != null) return;
-
-            player = NetworkManager.Instance.InstantiatePlayer();
-            player.Initialize(id, _playerName);
-
-            foreach (Client _client in Server.clients.Values) {
-                if (_client.player != null) {
-                    ServerSend.SpawnPlayer(id, _client.player);
-
-                    if (_client.id != id) {
-                        ServerSend.SpawnPlayer(_client.id, player);
-                    }
-                }
-            }
-
-            Debug.Log($"client{id} ({_playerName}) successfully joined the game");
-        });
     }
 }

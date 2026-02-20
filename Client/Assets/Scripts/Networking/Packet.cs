@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Text;
+using UnityEngine;
 
 public enum ServerPackets : byte {
     welcome = 1,
     spawnPlayer,
     playerDisconnected,
-    worldState,
+    worldState
 }
 
 public enum ClientPackets : byte {
     welcomeReceived = 1,
-    playerInput,
+    playerInput
 }
 
 public sealed class Packet : IDisposable {
@@ -102,6 +102,10 @@ public sealed class Packet : IDisposable {
         buffer.AddRange(BitConverter.GetBytes(value));
     }
 
+    public void Write(uint value) {
+        buffer.AddRange(BitConverter.GetBytes(value));
+    }
+
     public void Write(long value) {
         buffer.AddRange(BitConverter.GetBytes(value));
     }
@@ -138,10 +142,8 @@ public sealed class Packet : IDisposable {
 
     public byte ReadByte(bool moveReadPos = true) {
         if (UnreadLength() >= 1) {
-            byte value = readableBuffer[readPos];
-            if (moveReadPos) {
-                readPos += 1;
-            }
+            var value = readableBuffer[readPos];
+            if (moveReadPos) readPos += 1;
 
             return value;
         }
@@ -151,10 +153,8 @@ public sealed class Packet : IDisposable {
 
     public byte[] ReadBytes(int length, bool moveReadPos = true) {
         if (UnreadLength() >= length) {
-            byte[] value = buffer.GetRange(readPos, length).ToArray();
-            if (moveReadPos) {
-                readPos += length;
-            }
+            var value = buffer.GetRange(readPos, length).ToArray();
+            if (moveReadPos) readPos += length;
 
             return value;
         }
@@ -164,10 +164,8 @@ public sealed class Packet : IDisposable {
 
     public short ReadShort(bool moveReadPos = true) {
         if (UnreadLength() >= 2) {
-            short value = BitConverter.ToInt16(readableBuffer, readPos);
-            if (moveReadPos) {
-                readPos += 2;
-            }
+            var value = BitConverter.ToInt16(readableBuffer, readPos);
+            if (moveReadPos) readPos += 2;
 
             return value;
         }
@@ -177,10 +175,8 @@ public sealed class Packet : IDisposable {
 
     public int ReadInt(bool moveReadPos = true) {
         if (UnreadLength() >= 4) {
-            int value = BitConverter.ToInt32(readableBuffer, readPos);
-            if (moveReadPos) {
-                readPos += 4;
-            }
+            var value = BitConverter.ToInt32(readableBuffer, readPos);
+            if (moveReadPos) readPos += 4;
 
             return value;
         }
@@ -190,10 +186,8 @@ public sealed class Packet : IDisposable {
 
     public uint ReadUInt(bool moveReadPos = true) {
         if (UnreadLength() >= 4) {
-            uint value = BitConverter.ToUInt32(readableBuffer, readPos);
-            if (moveReadPos) {
-                readPos += 4;
-            }
+            var value = BitConverter.ToUInt32(readableBuffer, readPos);
+            if (moveReadPos) readPos += 4;
 
             return value;
         }
@@ -203,10 +197,8 @@ public sealed class Packet : IDisposable {
 
     public long ReadLong(bool moveReadPos = true) {
         if (UnreadLength() >= 8) {
-            long value = BitConverter.ToInt64(readableBuffer, readPos);
-            if (moveReadPos) {
-                readPos += 8;
-            }
+            var value = BitConverter.ToInt64(readableBuffer, readPos);
+            if (moveReadPos) readPos += 8;
 
             return value;
         }
@@ -216,10 +208,8 @@ public sealed class Packet : IDisposable {
 
     public float ReadFloat(bool moveReadPos = true) {
         if (UnreadLength() >= 4) {
-            float value = BitConverter.ToSingle(readableBuffer, readPos);
-            if (moveReadPos) {
-                readPos += 4;
-            }
+            var value = BitConverter.ToSingle(readableBuffer, readPos);
+            if (moveReadPos) readPos += 4;
 
             return value;
         }
@@ -229,10 +219,8 @@ public sealed class Packet : IDisposable {
 
     public bool ReadBool(bool moveReadPos = true) {
         if (UnreadLength() >= 1) {
-            bool value = BitConverter.ToBoolean(readableBuffer, readPos);
-            if (moveReadPos) {
-                readPos += 1;
-            }
+            var value = BitConverter.ToBoolean(readableBuffer, readPos);
+            if (moveReadPos) readPos += 1;
 
             return value;
         }
@@ -241,12 +229,10 @@ public sealed class Packet : IDisposable {
     }
 
     public string ReadString(bool moveReadPos = true) {
-        int length = ReadInt();
+        var length = ReadInt();
         if (UnreadLength() >= length) {
-            string value = Encoding.ASCII.GetString(readableBuffer, readPos, length);
-            if (moveReadPos && length > 0) {
-                readPos += length;
-            }
+            var value = Encoding.ASCII.GetString(readableBuffer, readPos, length);
+            if (moveReadPos && length > 0) readPos += length;
 
             return value;
         }

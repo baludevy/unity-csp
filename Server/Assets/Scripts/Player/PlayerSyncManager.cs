@@ -1,12 +1,10 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Player))]
 public class PlayerSyncManager : MonoBehaviour {
-    private void Awake() {
-    }
+    public byte syncState; // 0 = stay, 1 = slow down, 2 = speed up 
 
-    public void CheckOffset(int receivedTick, double arrivalTime) {
-        
+
+    public void UpdateSyncState(int playerTick) {
     }
 }

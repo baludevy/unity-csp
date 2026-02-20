@@ -10,7 +10,7 @@ public class Utils {
     }
 
     public static float ticksToTime(int _ticks) {
-        return (float)_ticks * Time.fixedDeltaTime;
+        return _ticks * Time.fixedDeltaTime;
     }
 
     public static float roundTimeToTimeStep(float _time) {

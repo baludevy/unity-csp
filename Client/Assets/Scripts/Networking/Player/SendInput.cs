@@ -4,18 +4,18 @@ using UnityEngine;
 public class SendInput : MonoBehaviour {
     public static SendInput Instance;
 
-    private bool up;
-    private bool down;
-    private bool left;
-    private bool right;
-    private bool jumping;
-
     public static bool DoSampleInputs = true;
 
     private static readonly List<PlayerInput> playerInputs = new();
-    public static int lastSentTick { get; private set; }
+    private bool down;
 
     public PlayerInput[] inputHistory = new PlayerInput[1024];
+    private bool jumping;
+    private bool left;
+    private bool right;
+
+    private bool up;
+    public static uint lastSentTick { get; private set; }
 
     private void Awake() {
         Instance = this;
@@ -26,9 +26,9 @@ public class SendInput : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.F)) {
             Debug.Log("Spiking CPU...");
-            float endTime = Time.realtimeSinceStartup + 0.5f;
+            var endTime = Time.realtimeSinceStartup + 0.5f;
             while (Time.realtimeSinceStartup < endTime) {
-                float dummy = Mathf.Sin(Time.realtimeSinceStartup);
+                var dummy = Mathf.Sin(Time.realtimeSinceStartup);
             }
         }
     }
@@ -51,17 +51,17 @@ public class SendInput : MonoBehaviour {
         jumping = Input.GetButton("Jump");
     }
 
-    public PlayerInput SampleInputs(int tick) {
-        PlayerInput input = new PlayerInput {
+    public PlayerInput SampleInputs(uint tick) {
+        var input = new PlayerInput {
             currentTick = tick,
             up = up,
             down = down,
             left = left,
             right = right,
-            jumping = jumping,
+            jumping = jumping
         };
 
-        int i = input.currentTick % NetworkSettings.inputBufferSize;
+        var i = input.currentTick % NetworkSettings.inputBufferSize;
         inputHistory[i] = input;
 
         return input;
@@ -69,30 +69,31 @@ public class SendInput : MonoBehaviour {
 
     public static void SendPlayerInputs() {
         if (PlayerMovement.Instance == null) return;
+        if (Instance == null) return;
 
-        const int redundancy = 1;
-        int bufferSize = NetworkSettings.inputBufferSize;
+        var bufferSize = NetworkSettings.inputBufferSize;
 
-        int lastCompletedTick = TickTimer.tick - 1;
-        if (lastCompletedTick < 0) return;
+        if (TickTimer.tick == 0) return;
+        var lastCompletedTick = TickTimer.tick - 1;
 
-        int firstUnsents = lastSentTick + 1;
+        var firstUnsents = lastSentTick + 1;
 
         playerInputs.Clear();
 
-        for (int t = firstUnsents; t <= lastCompletedTick; t++) {
-            PlayerInput input = Instance.inputHistory[t % bufferSize];
-            if (input != null && input.currentTick == t)
-                playerInputs.Add(input);
-        }
+        if (firstUnsents <= lastCompletedTick)
+            for (var t = firstUnsents; t <= lastCompletedTick; t++) {
+                var input = Instance.inputHistory[t % bufferSize];
+                if (input != null && input.currentTick == t)
+                    playerInputs.Add(input);
+            }
 
-        for (int i = 0; i < redundancy; i++) {
-            int commandTick = lastCompletedTick - i;
-            if (commandTick < 0) break;
-            if (commandTick >= firstUnsents) continue;
+        for (byte i = 0; i < 2; i++) {
+            var inputTick = lastCompletedTick - i;
 
-            PlayerInput input = Instance.inputHistory[commandTick % bufferSize];
-            if (input != null && input.currentTick == commandTick)
+            if (inputTick >= firstUnsents) continue;
+
+            var input = Instance.inputHistory[inputTick % bufferSize];
+            if (input != null && input.currentTick == inputTick)
                 playerInputs.Add(input);
         }
 

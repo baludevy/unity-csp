@@ -10,7 +10,7 @@ public class Player : MonoBehaviour {
     public PlayerMovement movement;
     public PlayerSyncManager syncManager;
 
-    public int desiredInputQueueLength = 0;
+    public int desiredInputQueueLength;
 
     public void Initialize(byte playerId, string playerUsername) {
         id = playerId;
