@@ -40,13 +40,8 @@ public class ClientSend : MonoBehaviour {
         _packet.Write((byte)inputs.Count);
         foreach (var input in inputs) {
             _packet.Write(input.currentTick);
-            _packet.Write(input.up);
-            _packet.Write(input.down);
-            _packet.Write(input.left);
-            _packet.Write(input.right);
-            _packet.Write(input.jumping);
+            _packet.Write(input.flags);
         }
-
 
         SendUDPData(_packet);
     }

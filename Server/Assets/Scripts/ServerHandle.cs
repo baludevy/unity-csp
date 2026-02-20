@@ -21,11 +21,7 @@ public abstract class ServerHandle {
         for (byte i = 0; i < inputCount; i++) {
             var input = new PlayerInput {
                 currentTick = _packet.ReadUInt(),
-                up = _packet.ReadBool(),
-                down = _packet.ReadBool(),
-                left = _packet.ReadBool(),
-                right = _packet.ReadBool(),
-                jumping = _packet.ReadBool()
+                flags = _packet.ReadByte(),
             };
 
             inputs.Add(input);
